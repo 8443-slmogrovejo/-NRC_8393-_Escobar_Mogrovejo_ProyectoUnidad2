@@ -1,0 +1,135 @@
+CREATE TABLE "TBFIFA"(
+"VarIdFIFA" varchar2(40) NOT NULL,
+"VarNombreFIFA" varchar2(40),
+CONSTRAINT "PkFIFA" PRIMARY KEY ("VarIdFIFA")
+);
+
+CREATE TABLE "TBPersona"(
+"VarIdP" varchar2(40) NOT NULL,
+"VarNombreP" varchar2(40),
+"VarGeneroP" varchar2(40),
+"VarCorreoP" varchar2(40),
+CONSTRAINT PkPersona PRIMARY KEY ("VarIdP")
+);
+
+CREATE TABLE "TBEmpleado"(
+"VarIdP" varchar2(40) NOT NULL,
+"IntSalarioEM" INT,
+"VarIdFIFA" varchar2(40),
+CONSTRAINT FkEmpleado PRIMARY KEY ("VarIdP"),
+FOREIGN KEY ("VarIdFIFA") REFERENCES "TBFIFA"("VarIdFIFA"),
+FOREIGN KEY ("VarIdP") REFERENCES "TBPersona"("VarIdP")    
+);
+
+CREATE TABLE "TBDirectivo"(
+"VarIdP" varchar2(40) NOT NULL,
+"IntRangoDir" INT NOT NULL,
+CONSTRAINT FkDirectivo PRIMARY KEY ("VarIdP"),
+FOREIGN KEY ("VarIdP") REFERENCES "TBEmpleado"("VarIdP")
+);
+
+CREATE TABLE "TBAgFinanciero"(
+"VarIdP" varchar2(40) NOT NULL, 
+"VarPaisBancoAgF" varchar2(40) NOT NULL,
+"VarCuentaBancariaAgF" varchar2(40) NOT NULL, 
+CONSTRAINT FkAgFinanciero PRIMARY KEY ("VarIdP"),
+FOREIGN KEY ("VarIdP") REFERENCES "TBEmpleado"("VarIdP")
+);
+
+CREATE TABLE "TBUsuario"(
+"VarIdP" varchar2(40) NOT NULL,  
+"VarClaveAccesoUs" varchar2(40) NOT NULL,
+CONSTRAINT FkUsuario PRIMARY KEY ("VarIdP"),
+FOREIGN KEY ("VarIdP") REFERENCES "TBEmpleado"("VarIdP")
+);
+
+CREATE TABLE "TBConfederacion"(
+"VarIdConf" varchar2(40) NOT NULL,
+"VarNombreConf" varchar2(40) NOT NULL,
+"VarIdFIFA" varchar2(40) NOT NULL,
+CONSTRAINT FkConfederacion PRIMARY KEY ("VarIdConf","VarIdFIFA"),
+FOREIGN KEY ("VarIdFIFA") REFERENCES "TBFIFA"("VarIdFIFA")
+);
+
+CREATE TABLE "TBClub"(
+"VarIdClub" varchar2(40) NOT NULL,
+"VarNombreClub" varchar2(40) NOT NULL,
+"VarCuentaBancariaClub" varchar2(40) NOT NULL,
+"VarIdConf" varchar2(40) NOT NULL,
+"VarIdFIFA" varchar2(40) NOT NULL,
+CONSTRAINT FkClub PRIMARY KEY ("VarIdClub","VarIdConf"),
+FOREIGN KEY ("VarIdFIFA","VarIdConf") REFERENCES "TBConfederacion"("VarIdFIFA","VarIdConf")
+);
+
+CREATE TABLE "TBParametro"(
+"VarIdParam" varchar2(40) NOT NULL,
+"VarNombreParam" varchar2(40) NOT NULL,
+"VarEstadoParam" varchar2(40) NOT NULL,
+"VarDescripcionParam" varchar2(60) NOT NULL,
+CONSTRAINT FkParametro PRIMARY KEY ("VarIdParam")
+);
+
+CREATE TABLE "TBMundial"(
+"VarIdMundial" varchar2(40) NOT NULL,
+"DtInicioMundial" DATE NOT NULL,
+"DtFinalMundial" DATE NOT NULL,
+CONSTRAINT FkMundial PRIMARY KEY ("VarIdMundial")
+);
+
+CREATE TABLE "TBContinente"(
+"VarIdContin" varchar2(40) NOT NULL,
+"VarNombreContin" varchar2(40) NOT NULL,
+"VarAsistenciaContin" varchar2(40) NOT NULL,
+"VarIdMundial" varchar2(40) NOT NULL,
+CONSTRAINT FkContinente PRIMARY KEY ("VarIdContin","VarIdMundial"),
+FOREIGN KEY ("VarIdMundial") REFERENCES "TBMundial"("VarIdMundial")
+);
+
+CREATE TABLE "TBPais"(
+"VarIdPais" varchar2(40) NOT NULL,
+"VarNombrePais" varchar2(40) NOT NULL,
+"VarAsistenciaPais" varchar2(40) NOT NULL,
+"VarIdContin" varchar2(40) NOT NULL,
+"VarIdMundial" varchar2(40) NOT NULL,
+CONSTRAINT FkMundialConti PRIMARY KEY ("VarIdPais","VarIdContin","VarIdMundial"),
+FOREIGN KEY ("VarIdMundial","VarIdContin") REFERENCES "TBContinente"("VarIdMundial","VarIdContin")
+);
+
+CREATE TABLE "TBSeleccion"(
+"VarIdSeleccion" varchar2(40) NOT NULL,
+"VarNombreSeleccion" varchar2(40) NOT NULL,
+"VarIdPais" varchar2(40) NOT NULL,
+"VarIdContin" varchar2(40) NOT NULL,
+"VarIdMundial" varchar2(40) NOT NULL,
+CONSTRAINT FkMundialContiPais PRIMARY KEY ("VarIdSeleccion","VarIdMundial"),
+FOREIGN KEY ("VarIdMundial","VarIdContin","VarIdPais") REFERENCES "TBPais"("VarIdMundial","VarIdContin","VarIdPais")
+);
+
+CREATE TABLE "TBJugConvocado"(
+"VarIdP" varchar2(40) NOT NULL,
+"VarIdSeleccion" varchar2(40) NOT NULL,
+"VarIdMundial" varchar2(40) NOT NULL,
+"IntDiasEnMundialJc" INT NOT NULL,
+CONSTRAINT FkMundialSelecVarIdP PRIMARY KEY ("VarIdSeleccion","VarIdP","VarIdMundial"),
+FOREIGN KEY ("VarIdMundial","VarIdSeleccion") REFERENCES "TBSeleccion"("VarIdMundial","VarIdSeleccion"),
+FOREIGN KEY ("VarIdP") REFERENCES "TBPersona"("VarIdP")
+);
+
+CREATE TABLE "TBClubJugador"(
+"VarIdClub" varchar2(40) NOT NULL,
+"VarIdP" varchar2(40) NOT NULL,
+"VarIdSeleccion" varchar2(40) NOT NULL,
+"VarIdConf" varchar2(40) NOT NULL,
+"VarIdParam" varchar2(40) NOT NULL,
+"VarIdMundial" varchar2(40) NOT NULL,
+CONSTRAINT FkClubJugador PRIMARY KEY ("VarIdConf","VarIdParam","VarIdP","VarIdClub","VarIdSeleccion","VarIdMundial"),
+FOREIGN KEY ("VarIdConf","VarIdClub") REFERENCES "TBClub"("VarIdConf","VarIdClub"),
+FOREIGN KEY ("VarIdParam") REFERENCES "TBParametro"("VarIdParam"),
+FOREIGN KEY ("VarIdP","VarIdSeleccion","VarIdMundial") REFERENCES "TBJugConvocado"("VarIdP","VarIdSeleccion","VarIdMundial")
+);
+
+
+
+
+
+
